@@ -8,7 +8,7 @@ import json
 import re
 import pickle
 from random import random, randrange
-from time import sleep
+from time import sleep, time
 import os
 
 from random_user_agent.user_agent import UserAgent
@@ -91,10 +91,9 @@ def job(page_link, start_page, end_page, domain):
     
     return result_leads, result_links, result_titles
 
-
-
 def main():
     
+    start_time = time()
     parser = argparse.ArgumentParser(description="Argument parser")
     parser.add_argument("--domain", type = str, default = 'biznes')
     parser.add_argument("--start_page", type = int, default = 1)
@@ -107,13 +106,17 @@ def main():
     if os.path.exists(save_path) == False:
         os.makedirs(save_path)
 
-    
-    
-
     job(page_link = tvp_link,
         start_page=args.start_page,
         end_page=args.end_page,
         domain = args.domain)
-  
+    
+    end_time = time()
+    n_pages = args.end_page - args.start_page + 1
+    exec_time = (end_time - start_time)/60
+    print(f"Obtaining {n_pages} pages took:")
+    print(f"{(exec_time):.3f} minutes")
+    print(f"average time per page: {(exec_time/n_pages):.3f} sec")
+    
 if __name__ == '__main__':
     main()
