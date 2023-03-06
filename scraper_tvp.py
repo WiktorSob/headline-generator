@@ -20,7 +20,7 @@ class ObtaingDataError(Exception):
 
     
 
-def get_website(page_link, random_user_agent = False):
+def get_website(page_link, random_user_agent = True):
     if random_user_agent:
         user_agent_rotator = UserAgent(popularity = [Popularity.COMMON.value,
                                                 Popularity.POPULAR.value],
@@ -116,7 +116,7 @@ def main():
     exec_time = (end_time - start_time)/60
     print(f"Obtaining {n_pages} pages took:")
     print(f"{(exec_time):.3f} minutes")
-    print(f"average time per page: {(exec_time/n_pages):.3f} sec")
+    print(f"average time per page: {(exec_time/n_pages):.3f} min")
     
 if __name__ == '__main__':
     main()
