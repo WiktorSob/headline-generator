@@ -2,33 +2,33 @@ import requests
 import html
 from bs4 import BeautifulSoup
 import unicodedata
-from unidecode import unidecode
-import argparse
+# from unidecode import unidecode
+
 import json
 import re
 import pickle
 from random import random, randrange
-from time import sleep, time
-import os
+from time import sleep
+
 
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import Popularity
-  
 
 class ObtaingDataError(Exception):
     pass
 
-    
 
 def get_website(page_link, random_user_agent = True):
     if random_user_agent:
         user_agent_rotator = UserAgent(popularity = [Popularity.COMMON.value,
                                                 Popularity.POPULAR.value],
                                 limit=100)
+        
         user_agent = user_agent_rotator.get_random_user_agent()
         headers = {'User-Agent' : user_agent}
     else:
         headers = None
+    print(headers)
     response = requests.get(page_link, headers=headers)
     content = response.content.decode('utf-8')
     content = html.unescape(content)
@@ -44,6 +44,7 @@ def find_metadata_json(soup):
     
     return data['items']
 
+
 def obtain_info(page_link, domain, page):
     page_link = page_link.format(domain = domain, page = page)
     
@@ -57,6 +58,14 @@ def obtain_info(page_link, domain, page):
     page_titles = [ x['title'] for x in json_metadata]
     
     return page_links, page_leads, page_titles
+
+
+def get_content(link):
+    soup = get_website(link)
+    text_parts = soup.find_all('p', {'class' : "am-article__text article__width"})
+    full_content = ' '.join([bit.get_text() for bit in text_parts])
+    return full_content
+
 
 def job(page_link, start_page, end_page, domain):
     result_links, result_leads, result_titles = [], [], []
@@ -90,33 +99,3 @@ def job(page_link, start_page, end_page, domain):
     print('Output file saved in /results')
     
     return result_leads, result_links, result_titles
-
-def main():
-    
-    start_time = time()
-    parser = argparse.ArgumentParser(description="Argument parser")
-    parser.add_argument("--domain", type = str, default = 'biznes')
-    parser.add_argument("--start_page", type = int, default = 1)
-    parser.add_argument("--end_page", type = int, default = 1)
-    args = parser.parse_args()
-    
-    tvp_link = 'https://www.tvp.info/{domain}?page={page}'
-
-    save_path = os.getcwd() + '/results'
-    if os.path.exists(save_path) == False:
-        os.makedirs(save_path)
-
-    job(page_link = tvp_link,
-        start_page=args.start_page,
-        end_page=args.end_page,
-        domain = args.domain)
-    
-    end_time = time()
-    n_pages = args.end_page - args.start_page + 1
-    exec_time = (end_time - start_time)/60
-    print(f"Obtaining {n_pages} pages took:")
-    print(f"{(exec_time):.3f} minutes")
-    print(f"average time per page: {(exec_time/n_pages):.3f} min")
-    
-if __name__ == '__main__':
-    main()
