@@ -28,7 +28,7 @@ def get_website(page_link, random_user_agent = True):
         headers = {'User-Agent' : user_agent}
     else:
         headers = None
-    print(headers)
+    # print(headers)
     response = requests.get(page_link, headers=headers)
     content = response.content.decode('utf-8')
     content = html.unescape(content)
@@ -60,11 +60,13 @@ def obtain_info(page_link, domain, page):
     return page_links, page_leads, page_titles
 
 
-def get_content(link):
+def get_content(link, idx):
     soup = get_website(link)
+    print(f'\rpage: {idx}')
     text_parts = soup.find_all('p', {'class' : "am-article__text article__width"})
     full_content = ' '.join([bit.get_text() for bit in text_parts])
-    return full_content
+    return {'id' : idx,
+            'content' : full_content}
 
 
 def job(page_link, start_page, end_page, domain):
