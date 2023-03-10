@@ -29,11 +29,15 @@ def get_website(page_link, random_user_agent = True):
     else:
         headers = None
     # print(headers)
-    response = requests.get(page_link, headers=headers)
-    content = response.content.decode('utf-8')
-    content = html.unescape(content)
-    content = unicodedata.normalize("NFKD", content)
-    soup = BeautifulSoup(content, 'html.parser')
+    try:
+        response = requests.get(page_link, headers=headers)
+        content = response.content.decode('utf-8')
+        content = html.unescape(content)
+        content = unicodedata.normalize("NFKD", content)
+        soup = BeautifulSoup(content, 'html.parser')
+    except:
+        print('Error occured')
+        soup = None
     return soup
 
 def find_metadata_json(soup):
@@ -60,12 +64,13 @@ def obtain_info(page_link, domain, page):
     return page_links, page_leads, page_titles
 
 
-def get_content(link, idx):
+def get_content(link, title, headline):
     soup = get_website(link)
-    print(f'\rpage: {idx}')
     text_parts = soup.find_all('p', {'class' : "am-article__text article__width"})
     full_content = ' '.join([bit.get_text() for bit in text_parts])
-    return {'id' : idx,
+    return {'link' : link,
+            'title' : title,
+            'headline' : headline,
             'content' : full_content}
 
 
